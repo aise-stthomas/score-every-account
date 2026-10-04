@@ -1,0 +1,14 @@
+# The deployed URL, the token and the bucket name live in .env, never in a commit
+.env
+
+# The deployment package is rebuilt by deploy.sh
+build/
+
+# data/fixtures, data/datasets and data/runs ARE committed: they are your measurements.
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+*.egg-info/
+.DS_Store
