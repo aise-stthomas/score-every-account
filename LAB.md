@@ -18,21 +18,7 @@ by the end: **the batch run's record**, **the online score's latency**, and whet
 4. **This model is deterministic.** A served score recomputed from its logged inputs is
    the same number, not a close one. A difference is a bug, found by a test.
 
-No model key is needed. Parts 0 to 2 need no AWS.
-
-## Part 0: the arithmetic, before anything is deployed
-
-On paper, for a business with **400,000 accounts**:
-
-| | your number |
-|---|---|
-| nightly: seconds to score every account at 10,000 scores a second | |
-| nightly: function-seconds a month, and what that costs at the Lambda price you look up | |
-| online: 2,000 cancellation-page visits a day: invocations a month | |
-| online: the latency budget for one score, if the page has 100 ms for it | |
-| the age of the feature table when the page reads it, if the nightly run finishes at 03:30 | |
-
-Keep it; Part 5 comes back to it.
+No model key is needed. Parts 1 and 2 need no AWS.
 
 ## Part 1: fit it
 
@@ -143,8 +129,8 @@ record says which weights were served, and it no longer matches.
 
 One EventBridge rule, the function as its target, invoked with a constant event the
 handler recognises. That is a calendar and one node. Look at the run record it produces,
-then write two sentences from Part 0: when the page reads the table at 09:00, how old is
-it, and what should the page do if last night's run did not publish?
+then write two sentences: when the page reads the table at 09:00, how old is it, and
+what should the page do if last night's run did not publish?
 
 Then take it down:
 
