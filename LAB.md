@@ -20,6 +20,45 @@ by the end: **the batch run's record**, **the online score's latency**, and whet
 
 No model key is needed. Parts 1 and 2 need no AWS.
 
+## Before you start: cron
+
+Part 5 schedules the run with a cron expression, the same notation every scheduler has
+used since Unix `cron` in 1975. It is a pattern over the clock: the rule fires at every
+minute that matches all of its fields.
+
+```
+cron(0 3 * * ? *)
+     │ │ │ │ │ └─ year
+     │ │ │ │ └─── day of week   1-7 or SUN-SAT
+     │ │ │ └───── month         1-12 or JAN-DEC
+     │ │ └─────── day of month  1-31
+     │ └───────── hour          0-23, UTC
+     └─────────── minute        0-59
+```
+
+`*` is every value, `a-b` a range, `a,b` a list, `a/n` every n starting at a, and `?`
+is "whichever": EventBridge insists you pin either day of month or day of week and put
+`?` in the other. Classic Unix cron has the same five fields without the year and
+without `?`; it is written `0 3 * * *` in a crontab, and that one line is the
+scheduler of more nightly jobs than any product.
+
+| expression | fires |
+|---|---|
+| `cron(0 3 * * ? *)` | 03:00 UTC every day: the lab's nightly run |
+| `cron(0 3 ? * SUN *)` | 03:00 UTC on Sundays: the lecture's weekly job |
+| `cron(0/15 * * * ? *)` | every quarter hour |
+| `cron(30 8 1 * ? *)` | 08:30 UTC on the first of the month |
+| `cron(0 9-17 ? * MON-FRI *)` | on the hour, nine to five, weekdays |
+
+Two things people get wrong. Hours are **UTC**; 03:00 is 22:00 the evening before in
+Minnesota in October and 21:00 after the clocks change, so the night's run has no fixed
+local time. And the expression says when to *start*, not what the run is *for*: the as-of
+of the data the run reads is a different date, and the run record carries both.
+
+When you cannot say a time, say an interval: `rate(5 minutes)`, `rate(1 hour)`,
+`rate(1 day)`, counted from the moment the rule is created. Nothing fires more often
+than once a minute.
+
 ## Part 1: fit it
 
 The tables are in `data/tables/`: `accounts`, `features` (one row per account per week,
