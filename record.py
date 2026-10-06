@@ -82,6 +82,7 @@ def main() -> None:
     p.add_argument("--runs", type=int, default=1)
     p.add_argument("--n", type=int, default=50, help="accounts in the sample")
     p.add_argument("--timeout", type=float, default=30)
+    p.add_argument("--fresh", action="store_true", help="discard this condition's fixtures first (recording resumes otherwise)")
     args = p.parse_args()
     name = args.name or args.provider
     if args.provider == "http" and not args.url:
@@ -91,6 +92,8 @@ def main() -> None:
         from src.function.app import score_one
     for run in range(1, args.runs + 1):
         path = fixtures.run_path(name, run)
+        if args.fresh and path.exists():
+            path.unlink()
         done = fixtures.recorded_ids(path)
         todo = [i for i in ids if i not in done]
         print(f"{name} run {run}: {len(done)} recorded, {len(todo)} to go  ({args.url if args.provider == 'http' else 'in this process'})", flush=True)

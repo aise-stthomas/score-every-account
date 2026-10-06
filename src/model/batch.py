@@ -17,7 +17,7 @@ from .score import score_vector, weights_hash
 CHECK_TOLERANCE = 0.15   # a run whose share above the threshold moves more than this is not published
 
 
-def run(rows: list[dict], w: dict, run_id: str, as_of: str, threshold: float = 0.5,
+def run(rows: list[dict], w: dict, run_id: str, as_of: str, threshold: float = 0.75,
         previous: dict | None = None) -> tuple[list[dict], dict]:
     t0 = time.perf_counter()
     wh = weights_hash(w)

@@ -103,8 +103,9 @@ uv run latency.py http
 Per run: the cold start, split into init (the imports and the weights load) and the
 score; warm p50 and p95 of the round trip, beside the function's own time for the dot
 product. Put the numbers next to the previous lab's: seconds for a language model,
-milliseconds for this. If no run shows a cold start, `./deploy.sh --recycle` and record
-once more.
+milliseconds for this. If no run shows a cold start (the batch run in Part 3 warmed the
+sandbox), `./deploy.sh --recycle` and record once more with `--fresh`, since recording
+resumes where it left off otherwise.
 
 Every `/score` response carries the feature vector as served, the row's as-of date and
 its age in days, the model version and the weights hash. The function also prints the
@@ -118,6 +119,13 @@ For every served score, the score is recomputed here from the served feature vec
 this repository's weights. **Exactly equal**, every one. Change one number in
 `src/model/weights.json`, run it again, and watch it fail: the weights hash on every
 record says which weights were served, and it no longer matches.
+
+"Exactly" had to be engineered. Read `score_vector` in `src/model/score.py`: the dot
+product is IEEE arithmetic and gives the same bits on every CPU, but `exp` is a library
+call, and the one on Lambda's Linux and the one on a Mac disagree in the last bit for
+some inputs. This check caught that as a one-bit mismatch on one account in fifty, so the
+sigmoid goes through Python's `decimal` module, which is correctly rounded by
+specification. A test that demands exact equality is what finds the difference.
 
 ## Part 5: schedule it
 

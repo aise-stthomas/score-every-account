@@ -110,7 +110,7 @@ def run_batch(key: str, run_id: str | None) -> dict:
         previous = json.loads(s3.get_object(Bucket=bucket, Key=f"runs/{previous['run_id']}.json")["Body"].read().decode())
     except Exception:  # noqa: BLE001  (no current run yet)
         previous = None
-    scores, record = B.run(rows, WEIGHTS, run_id, as_of, previous=previous)
+    scores, record = B.run(rows, WEIGHTS, run_id, as_of, threshold=THRESHOLD, previous=previous)
     record["input_key"] = key
     s3.put_object(Bucket=bucket, Key=f"scores/run-{run_id}.jsonl", Body=B.to_jsonl(scores).encode())   # replaced, never appended
     s3.put_object(Bucket=bucket, Key=f"runs/{run_id}.json", Body=json.dumps(record, indent=1).encode())

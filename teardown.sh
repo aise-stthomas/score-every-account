@@ -11,7 +11,8 @@ FN="${FUNCTION_NAME:-score-every-account}"; RULE="${FN}-nightly"
 export AWS_DEFAULT_REGION=us-east-1 AWS_PAGER=""
 [ -f .env ] && { set -a; . ./.env; set +a; }
 
-if command -v aws >/dev/null && aws sts get-caller-identity >/dev/null 2>&1; then
+if command -v aws >/dev/null && ACCOUNT="$(aws sts get-caller-identity --query Account --output text 2>/dev/null)"; then
+  BUCKET="${BUCKET:-aise-${ACCOUNT}-scores}"    # the name deploy.sh derives, so --bucket works after a plain teardown cleared .env
   aws events remove-targets --rule "$RULE" --ids 1 >/dev/null 2>&1 && aws events delete-rule --name "$RULE" >/dev/null 2>&1 && echo "removed the rule $RULE"
   aws lambda delete-function-url-config --function-name "$FN" >/dev/null 2>&1 && echo "removed the URL of $FN"
   aws lambda delete-function --function-name "$FN" >/dev/null 2>&1 && echo "deleted the function $FN" || echo "the function $FN was not there"
